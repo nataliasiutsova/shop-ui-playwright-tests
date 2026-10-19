@@ -22,21 +22,12 @@ class LoginPage(BasePage):
         self.page.fill(self.USERNAME_INPUT, username)
         self.page.fill(self.PASSWORD_INPUT, password)
         self.page.click(self.LOGIN_BUTTON)
-        try:
-          self.page.wait_for_selector(
+        self.page.wait_for_selector(
             "//div[@data-test='inventory-item']",
             state="visible",
-            timeout=30000
+            timeout=1000
           )
-        except Exception as e:
-            # Создаем папку, если ее нет
-            os.makedirs("test-results", exist_ok=True)
-            # Сохраняем скриншот
-            self.page.screenshot(path="test-results/error_screenshot.png", full_page=True)
-            # Сохраняем HTML
-            with open("test-results/error_page.html", "w", encoding="utf-8") as f:
-                f.write(self.page.content())
-            raise e
+
 
 
     def expect_error(self, text: str):

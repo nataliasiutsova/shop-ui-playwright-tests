@@ -14,7 +14,7 @@ from utils.users import STANDARD_USER
 load_dotenv()
 
 
-BASE_URL = os.getenv("BASE_URL", "https://www.saucedemo.com")
+BASE_URL = os.getenv("BASE_URL")
 
 BROWSER_CONTEXT_OPTS = {
     "viewport": {"width": 1920, "height": 1080},
