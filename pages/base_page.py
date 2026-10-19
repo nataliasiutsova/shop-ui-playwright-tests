@@ -52,14 +52,12 @@ class BasePage:
 
     def take_screenshot(self, name: str = "screenshot"):
         try:
-         allure.attach(
-            self.page.screenshot(full_page=True),
-            name=name,
-            attachment_type=allure.attachment_type.PNG,
-         )
-        except Exception as e:
-            allure.attach(
-                f"Failed to take screenshot: {e}",
-                name=f"{name} — error",
-                attachment_type=allure.attachment_type.TEXT,
-            )
+            self.page.wait_for_load_state("networkidle", timeout=5000)
+        except Exception:
+            pass
+
+        allure.attach(
+                self.page.screenshot(full_page=True),
+                name=name,
+                attachment_type=allure.attachment_type.PNG,
+        )

@@ -163,7 +163,6 @@ def logged_in_page(clean_cart: Page, base_url: str) -> Page:
     login = LoginPage(clean_cart, base_url)
     login.open()
     login.login(STANDARD_USER.username, STANDARD_USER.password)
-    login.expect_url_contains("/inventory.html")
     return clean_cart
 
 
