@@ -25,7 +25,7 @@ class LoginPage(BasePage):
         self.page.wait_for_selector(
             "//div[@data-test='inventory-item']",
             state="visible",
-            timeout=1000
+            timeout=10000
           )
 
 
