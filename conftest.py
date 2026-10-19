@@ -163,15 +163,7 @@ def logged_in_page(clean_cart: Page, base_url: str) -> Page:
     """Page with a logged-in standard user and clean cart."""
     login = LoginPage(clean_cart, base_url)
     login.open()
-    try:
-        login.login(STANDARD_USER.username, STANDARD_USER.password)
-    except Exception as e:
-        # Если логин упал — сохраняем скриншот и HTML
-        os.makedirs("test-results", exist_ok=True)
-        clean_cart.screenshot(path="test-results/login_error.png", full_page=True)
-        with open("test-results/login_error.html", "w", encoding="utf-8") as f:
-            f.write(clean_cart.content())
-        raise e  # Пробрасываем ошибку, чтобы тест упал (а не завис)
+    login.login(STANDARD_USER.username, STANDARD_USER.password)
     return clean_cart
 
 
