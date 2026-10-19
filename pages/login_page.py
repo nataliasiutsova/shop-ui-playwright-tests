@@ -21,8 +21,11 @@ class LoginPage(BasePage):
         self.page.fill(self.USERNAME_INPUT, username)
         self.page.fill(self.PASSWORD_INPUT, password)
         self.page.click(self.LOGIN_BUTTON)
-        self.page.wait_for_url("**/inventory.html", timeout=20000)
-        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_selector(
+            "//div[@class='inventory_item']",
+            state="visible",
+            timeout=30000
+        )
 
     def expect_error(self, text: str):
         self.expect_visible(self.ERROR_MESSAGE)

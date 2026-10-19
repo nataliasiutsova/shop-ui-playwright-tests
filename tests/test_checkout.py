@@ -137,9 +137,6 @@ def test_back_home_after_complete(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Back to inventory")
 
 
-# ============================================================
-# REGRESSION — negative cases
-# ============================================================
 @allure.feature("Checkout")
 @allure.title("Empty first name is rejected")
 @allure.severity(allure.severity_level.NORMAL)
