@@ -1,7 +1,6 @@
 import os
 import json
 import pytest
-from dotenv import load_dotenv
 from playwright.sync_api import Page
 
 from pages.inventory_page import InventoryPage
@@ -11,10 +10,7 @@ from pages.checkout_page import CheckoutPage
 from utils.users import STANDARD_USER
 
 
-load_dotenv()
-
-
-BASE_URL = os.getenv("BASE_URL")
+BASE_URL = "https://www.saucedemo.com"
 
 BROWSER_CONTEXT_OPTS = {
     "viewport": {"width": 1920, "height": 1080},

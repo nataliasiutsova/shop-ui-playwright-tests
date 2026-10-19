@@ -61,8 +61,6 @@ jobs:
 
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
         run: |
           echo "▶ Stage 1: Smoke tests"
           pytest -m smoke -v --alluredir=allure-results
@@ -70,8 +68,6 @@ jobs:
 
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
         run: |
           echo "▶ Stage 2: Regression + E2E"
           pytest -m "(regression or e2e) and not smoke" -v -n 4 --dist loadfile --alluredir=allure-results 
@@ -98,10 +94,23 @@ jobs:
 
       - name: Add report link to summary
         if: always()
-        env:
-          MARKER: ${{ inputs.marker || 'smoke' }}
+
         run: |
-          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MARKER="${{ inputs.marker }}"
+          else
+            MARKER="all" 
+          fi
+          
+          if [ "$MARKER" = "smoke" ]; then
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          elif [ "$MARKER" = "all" ]; then
+            date
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          else
+            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/$MARKER/"
+          fi
+          
           echo "## 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Marker:** \`$MARKER\`" >> $GITHUB_STEP_SUMMARY
