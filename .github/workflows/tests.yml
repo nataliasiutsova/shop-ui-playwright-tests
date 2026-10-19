@@ -109,3 +109,10 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: true
+
+      - name: Upload error artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-debug
+          path: test-results/
