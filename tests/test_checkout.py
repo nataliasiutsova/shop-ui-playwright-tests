@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-
+@allure.feature("Checkout")
 @allure.title("Checkout page opens with form")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -18,6 +18,7 @@ def test_checkout_step_one_opens(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Checkout step one")
 
 
+@allure.feature("Checkout")
 @allure.title("Valid form data proceeds to step two")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -37,6 +38,7 @@ def test_checkout_valid_form(inventory_page, cart_page, checkout_page):
         checkout_page.expect_page_title("Checkout: Overview")
 
 
+@allure.feature("Checkout")
 @allure.title("Overview page shows correct item count")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -55,6 +57,7 @@ def test_overview_shows_items(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Overview with 2 items")
 
 
+@allure.feature("Checkout")
 @allure.title("Total equals subtotal + tax")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -76,6 +79,7 @@ def test_total_calculation(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Overview with total")
 
 
+@allure.feature("Checkout")
 @allure.title("Complete order shows confirmation")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.regression
@@ -95,6 +99,7 @@ def test_complete_order(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Order complete")
 
 
+@allure.feature("Checkout")
 @allure.title("Cancel on step one returns to cart")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -112,6 +117,7 @@ def test_cancel_step_one(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Back to cart after cancel")
 
 
+@allure.feature("Checkout")
 @allure.title("Back Home button after completion returns to inventory")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -134,7 +140,7 @@ def test_back_home_after_complete(inventory_page, cart_page, checkout_page):
 # ============================================================
 # REGRESSION — negative cases
 # ============================================================
-
+@allure.feature("Checkout")
 @allure.title("Empty first name is rejected")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -152,6 +158,7 @@ def test_empty_first_name(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Error: empty first name")
 
 
+@allure.feature("Checkout")
 @allure.title("Empty last name is rejected")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -169,6 +176,7 @@ def test_empty_last_name(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Error: empty last name")
 
 
+@allure.feature("Checkout")
 @allure.title("Empty postal code is rejected")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -186,6 +194,7 @@ def test_empty_postal_code(inventory_page, cart_page, checkout_page):
         checkout_page.take_screenshot("Error: empty postal code")
 
 
+@allure.feature("Checkout")
 @allure.title("Checkout page is not accessible without login")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.regression

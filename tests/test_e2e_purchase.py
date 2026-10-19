@@ -3,7 +3,7 @@ import pytest
 
 from utils.users import STANDARD_USER
 
-
+@allure.feature("E2E")
 @allure.title("E2E: full purchase flow — login → add → checkout → complete")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.e2e
@@ -35,6 +35,8 @@ def test_full_purchase_flow(login_page, inventory_page, cart_page, checkout_page
         checkout_page.expect_complete()
         checkout_page.take_screenshot("Order completed")
 
+
+@allure.feature("E2E")
 @allure.title("E2E: purchase with checkout cancellation")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.e2e

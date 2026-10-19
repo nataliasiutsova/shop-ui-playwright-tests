@@ -2,6 +2,7 @@ import allure
 import pytest
 
 
+@allure.feature("Cart")
 @allure.title("Cart is empty by default")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -17,6 +18,7 @@ def test_cart_empty_by_default(cart_page):
         cart_page.take_screenshot("Empty cart")
 
 
+@allure.feature("Cart")
 @allure.title("Product added on inventory appears in cart")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -33,6 +35,7 @@ def test_added_product_appears_in_cart(inventory_page, cart_page):
         cart_page.take_screenshot("Cart with 1 item")
 
 
+@allure.feature("Cart")
 @allure.title("Cart shows correct product name and price")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -52,6 +55,7 @@ def test_cart_item_details(inventory_page, cart_page):
         cart_page.take_screenshot("Cart with product details")
 
 
+@allure.feature("Cart")
 @allure.title("Product can be removed from cart page")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -71,6 +75,7 @@ def test_remove_item_from_cart_page(inventory_page, cart_page):
         cart_page.take_screenshot("Cart after removing item")
 
 
+@allure.feature("Cart")
 @allure.title("Two products appear in cart")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -87,6 +92,7 @@ def test_two_products_in_cart(inventory_page, cart_page):
         cart_page.take_screenshot("Cart with 2 items")
 
 
+@allure.feature("Cart")
 @allure.title("Continue shopping returns to inventory")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -102,6 +108,7 @@ def test_continue_shopping(cart_page):
         cart_page.take_screenshot("Back to inventory")
 
 
+@allure.feature("Cart")
 @allure.title("Checkout button opens checkout page")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.regression
@@ -120,6 +127,7 @@ def test_checkout_button(inventory_page, cart_page):
         cart_page.take_screenshot("Checkout step one")
 
 
+@allure.feature("Cart")
 @allure.title("Cart page is not accessible without login")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.regression

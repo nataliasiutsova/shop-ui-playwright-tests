@@ -3,6 +3,7 @@ import pytest
 from playwright.sync_api import Page, expect
 
 
+@allure.feature("Inventory")
 @allure.title("Inventory page shows products after login")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -17,6 +18,7 @@ def test_inventory_page_shows_products(inventory_page):
         assert count > 0, f"Expected products, got {count}"
 
 
+@allure.feature("Inventory")
 @allure.title("Product can be added to cart")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -33,6 +35,7 @@ def test_add_product_to_cart(inventory_page):
         inventory_page.expect_cart_count(1)
 
 
+@allure.feature("Inventory")
 @allure.title("Products can be sorted by name A-Z")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -45,6 +48,7 @@ def test_sort_by_name_asc(inventory_page):
         inventory_page.take_screenshot("Sorted A-Z")
 
 
+@allure.feature("Inventory")
 @allure.title("Products can be sorted by name Z-A")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -57,6 +61,7 @@ def test_sort_by_name_desc(inventory_page):
         inventory_page.take_screenshot("Sorted Z-A")
 
 
+@allure.feature("Inventory")
 @allure.title("Products can be sorted by price low to high")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -69,6 +74,7 @@ def test_sort_by_price_asc(inventory_page):
         inventory_page.take_screenshot("Sorted price low-high")
 
 
+@allure.feature("Inventory")
 @allure.title("Products can be sorted by price high to low")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -81,6 +87,7 @@ def test_sort_by_price_desc(inventory_page):
         inventory_page.take_screenshot("Sorted price high-low")
 
 
+@allure.feature("Inventory")
 @allure.title("Two products can be added to cart")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -97,6 +104,7 @@ def test_add_two_products(inventory_page):
         inventory_page.take_screenshot("Two products in cart")
 
 
+@allure.feature("Inventory")
 @allure.title("Product can be removed from cart")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -116,6 +124,7 @@ def test_remove_product_from_cart(inventory_page):
         inventory_page.take_screenshot("Product removed from cart")
 
 
+@allure.feature("Inventory")
 @allure.title("Removing second product keeps first in cart")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -134,7 +143,7 @@ def test_remove_second_product_keeps_first(inventory_page):
         inventory_page.take_screenshot("One product left")
 
 
-
+@allure.feature("Inventory")
 @allure.title("Button changes from 'Add to cart' to 'Remove' after adding first product")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -150,6 +159,7 @@ def test_button_changes_to_remove(inventory_page):
         inventory_page.take_screenshot("Product at index 0 — Remove button visible")
 
 
+@allure.feature("Inventory")
 @allure.title("First 'Remove' button becomes 'Add to cart' after removal")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -170,6 +180,7 @@ def test_button_changes_back_after_remove(inventory_page):
         inventory_page.expect_first_hidden(inventory_page.REMOVE_BUTTON)
 
 
+@allure.feature("Inventory")
 @allure.title("Inventory is not accessible without login")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.regression

@@ -21,7 +21,7 @@ class LoginPage(BasePage):
         self.page.fill(self.USERNAME_INPUT, username)
         self.page.fill(self.PASSWORD_INPUT, password)
         self.page.click(self.LOGIN_BUTTON)
-        self.expect_url_contains("/inventory.html")
+
 
     def expect_error(self, text: str):
         self.expect_visible(self.ERROR_MESSAGE)

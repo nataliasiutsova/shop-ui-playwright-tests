@@ -3,7 +3,7 @@ import pytest
 
 from utils.users import STANDARD_USER
 
-
+@allure.feature("Logout")
 @allure.title("Cart is preserved after logout and re-login")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -31,6 +31,7 @@ def test_cart_preserved_after_logout(inventory_page, login_page):
         inventory_page.take_screenshot("Cart after re-login — still 1 item")
 
 
+@allure.feature("Logout")
 @allure.title("User is redirected to login page after logout")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression

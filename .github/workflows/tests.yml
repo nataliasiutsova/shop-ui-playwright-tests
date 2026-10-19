@@ -1,0 +1,111 @@
+name: UI Tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      marker:
+        description: 'Test marker to run'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+          - e2e
+          - all
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Install Allure CLI
+        if: always()
+        run: |
+          curl -o allure.tgz -Ls https://github.com/allure-framework/allure2/releases/download/2.27.0/allure-2.27.0.tgz
+          tar -xzf allure.tgz
+          sudo mv allure-2.27.0 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+
+      - name: Cache Allure history
+        uses: actions/cache@v4
+        with:
+          path: allure-results/history
+          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'smoke' }}-${{ github.run_id }}
+          restore-keys: |
+            allure-history-${{ github.ref_name }}-${{ inputs.marker || 'smoke' }}-
+            allure-history-${{ github.ref_name }}-
+            allure-history-
+
+      - name: Run smoke tests (sequential)
+        if: always() && (inputs.marker == 'smoke' || inputs.marker == 'all' || inputs.marker == '')
+        run: |
+          echo "▶ Stage 1: Smoke tests"
+          pytest -m smoke -v --alluredir=allure-results
+
+      - name: Run regression + e2e (4 workers)
+        if: always() && (inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
+        run: |
+          echo "▶ Stage 2: Regression + E2E"
+          pytest -m "(regression or e2e) and not smoke" -v -n 4 --dist loadfile --alluredir=allure-results
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          allure generate allure-results -o allure-report --clean
+
+      - name: Copy history back for next run
+        if: always()
+        run: |
+          mkdir -p allure-results/history
+          cp -r allure-report/history/* allure-results/history/ || true
+
+      - name: Upload Allure report (artifact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          retention-days: 30
+
+      - name: Add report link to summary
+        if: always()
+        env:
+          MARKER: ${{ inputs.marker || 'smoke' }}
+        run: |
+          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "## 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Marker:** \`$MARKER\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Report:** [$URL]($URL)" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deploy to GitHub Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
+          keep_files: true

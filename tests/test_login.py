@@ -7,6 +7,7 @@ EMPTY = ""
 WRONG_PASSWORD = "wrong_password"
 
 
+@allure.feature("Login")
 @allure.title("Valid user logs in successfully")
 @allure.severity(allure.severity_level.CRITICAL)
 @pytest.mark.smoke
@@ -23,10 +24,7 @@ def test_login_success(login_page):
         login_page.take_screenshot("Inventory page loaded")
 
 
-# ============================================================
-# REGRESSION — edge cases
-# ============================================================
-
+@allure.feature("Login")
 @allure.title("Invalid password is rejected")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -42,6 +40,7 @@ def test_login_invalid_password(login_page):
         login_page.take_screenshot("Error: invalid password")
 
 
+@allure.feature("Login")
 @allure.title("Locked user cannot log in")
 @allure.severity(allure.severity_level.NORMAL)
 @pytest.mark.regression
@@ -57,6 +56,7 @@ def test_login_locked_user(login_page):
         login_page.take_screenshot("Error: user is locked out")
 
 
+@allure.feature("Login")
 @allure.title("Empty username is rejected")
 @allure.severity(allure.severity_level.MINOR)
 @pytest.mark.regression
@@ -72,6 +72,7 @@ def test_login_empty_username(login_page):
         login_page.take_screenshot("Error: empty username")
 
 
+@allure.feature("Login")
 @allure.title("Empty password is rejected")
 @allure.severity(allure.severity_level.MINOR)
 @pytest.mark.regression
@@ -87,6 +88,7 @@ def test_login_empty_password(login_page):
         login_page.take_screenshot("Error: empty password")
 
 
+@allure.feature("Login")
 @allure.title("Both fields empty are rejected")
 @allure.severity(allure.severity_level.MINOR)
 @pytest.mark.regression
