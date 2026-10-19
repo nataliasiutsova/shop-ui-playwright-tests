@@ -20,6 +20,7 @@ BROWSER_CONTEXT_OPTS = {
     "viewport": {"width": 1920, "height": 1080},
     "locale": "en-US",
     "timezone_id": "Europe/Minsk",
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 }
 
 
@@ -162,7 +163,15 @@ def logged_in_page(clean_cart: Page, base_url: str) -> Page:
     """Page with a logged-in standard user and clean cart."""
     login = LoginPage(clean_cart, base_url)
     login.open()
-    login.login(STANDARD_USER.username, STANDARD_USER.password)
+    try:
+        login.login(STANDARD_USER.username, STANDARD_USER.password)
+    except Exception as e:
+        # Если логин упал — сохраняем скриншот и HTML
+        os.makedirs("test-results", exist_ok=True)
+        clean_cart.screenshot(path="test-results/login_error.png", full_page=True)
+        with open("test-results/login_error.html", "w", encoding="utf-8") as f:
+            f.write(clean_cart.content())
+        raise e  # Пробрасываем ошибку, чтобы тест упал (а не завис)
     return clean_cart
 
 
