@@ -49,14 +49,15 @@ jobs:
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
       - name: Cache Allure history
+        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
         uses: actions/cache@v4
         with:
-          path: allure-results/history
-          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'smoke' }}-${{ github.run_id }}
-          restore-keys: |
-            allure-history-${{ github.ref_name }}-${{ inputs.marker || 'smoke' }}-
-            allure-history-${{ github.ref_name }}-
-            allure-history-
+            path: allure-results/history
+            key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
+            restore-keys: |
+              allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-
+              allure-history-${{ github.ref_name }}-
+              allure-history-
             
 
       - name: Run smoke tests (sequential)
@@ -86,10 +87,10 @@ jobs:
           allure generate allure-results -o allure-report --clean
 
       - name: Copy history back for next run
-        if: always()
+        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
         run: |
-          mkdir -p allure-results/history
-          cp -r allure-report/history/* allure-results/history/ || true
+            mkdir -p allure-results/history
+            cp -r allure-report/history/* allure-results/history/ || true
 
       - name: Upload Allure report (artifact)
         if: always()
