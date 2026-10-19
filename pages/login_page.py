@@ -21,6 +21,10 @@ class LoginPage(BasePage):
         self.page.fill(self.USERNAME_INPUT, username)
         self.page.fill(self.PASSWORD_INPUT, password)
         self.page.click(self.LOGIN_BUTTON)
+        self.page.wait_for_selector(
+            "//div[@id='inventory_container']",
+            timeout=15000,
+        )
 
 
     def expect_error(self, text: str):
