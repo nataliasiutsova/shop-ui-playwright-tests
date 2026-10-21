@@ -54,41 +54,29 @@ jobs:
           rm -rf allure-results
           mkdir -p allure-results
 
-      - name: Restore Allure history
-        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
-        uses: actions/cache/restore@v4
-        with:
-          path: allure-history
-          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
-          restore-keys: |
-            allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-
-            allure-history-${{ github.ref_name }}-
-            allure-history-
-
-      - name: Copy history to results
-        if: always() && hashFiles('allure-history/**') != ''
-        run: |
-          mkdir -p allure-results/history
-          cp -r allure-history/* allure-results/history/ || true
-
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
         run: |
-          echo "▶ Stage 1: Smoke tests"
+          if [ "${{ github.event_name }}" == "push" ] || [ "${{ inputs.marker }}" == "all" ]; then
+            echo "▶ Stage 1: Smoke tests (part of the 'all' run)"
+          else
+            echo "▶ Running tests with marker: smoke"
+          fi
+          
           pytest -m smoke -v --alluredir=allure-results
 
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
         run: |
-          echo "▶ Stage 2: Regression + E2E"
-          
-          # Если запускается ТОЛЬКО regression или e2e (без smoke), очищаем папку от возможных артефактов
-          if [ "${{ inputs.marker }}" == "regression" ] || [ "${{ inputs.marker }}" == "e2e" ]; then
+          if [ "${{ github.event_name }}" == "push" ] || [ "${{ inputs.marker }}" == "all" ]; then
+            echo "▶ Stage 2: Regression + E2E (excluding smoke)"
+            PYTEST_MARKER="(regression or e2e) and not smoke"
+          else
+            echo "▶ Running tests with marker: ${{ inputs.marker }}"
+            PYTEST_MARKER="${{ inputs.marker }}"
+            # Очищаем папку, так как smoke не запускался
             rm -rf allure-results
             mkdir -p allure-results
-            PYTEST_MARKER="${{ inputs.marker }}"
-          else
-            PYTEST_MARKER="(regression or e2e) and not smoke"
           fi
           
           pytest -m "$PYTEST_MARKER" -v -n 4 --dist loadfile --alluredir=allure-results
@@ -97,20 +85,6 @@ jobs:
         if: always()
         run: |
           allure generate allure-results -o allure-report --clean
-
-      - name: Save Allure history for next run
-        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
-        run: |
-          mkdir -p allure-history
-          rm -rf allure-history/*
-          cp -r allure-report/history/* allure-history/ || true
-
-      - name: Cache Allure history
-        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
-        uses: actions/cache/save@v4
-        with:
-          path: allure-history
-          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
 
       - name: Upload Allure report (artifact)
         if: always()
@@ -129,10 +103,7 @@ jobs:
             MARKER="all" 
           fi
           
-          if [ "$MARKER" = "smoke" ]; then
-            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          elif [ "$MARKER" = "all" ]; then
-            date
+          if [ "$MARKER" = "smoke" ] || [ "$MARKER" = "all" ]; then
             URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           else
             URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/$MARKER/"
