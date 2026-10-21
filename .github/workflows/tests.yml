@@ -107,12 +107,24 @@ jobs:
       - name: Add report link to summary
         if: always()
         run: |
-          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          echo "## 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Report:** [$URL]($URL)" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.event_name }}" == "push" ]; then
+            MARKER="all"
+          else
+            MARKER="${{ inputs.marker }}"
+          fi
 
-      # --- ОФИЦИАЛЬНЫЙ ДЕПЛОЙ НА GITHUB PAGES ---
+          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+
+          echo "## 🧪 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** \`${{ github.event_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Executed Marker:** \`$MARKER\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
+          echo "You can view the full report here: [$URL]($URL)" >> $GITHUB_STEP_SUMMARY
+
 
       - name: Setup Pages
         if: always() && github.ref == 'refs/heads/main'
