@@ -48,53 +48,69 @@ jobs:
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
-      - name: Cache Allure history
+      - name: Prepare results directory
+        if: always()
+        run: |
+          rm -rf allure-results
+          mkdir -p allure-results
+
+      - name: Restore Allure history
         if: always() && (github.event_name == 'push' || inputs.marker == 'all')
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
-            path: allure-results/history
-            key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
-            restore-keys: |
-              allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-
-              allure-history-${{ github.ref_name }}-
-              allure-history-
-            
+          path: allure-history
+          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
+          restore-keys: |
+            allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-
+            allure-history-${{ github.ref_name }}-
+            allure-history-
+
+      - name: Copy history to results
+        if: always() && hashFiles('allure-history/**') != ''
+        run: |
+          mkdir -p allure-results/history
+          cp -r allure-history/* allure-results/history/ || true
 
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
         run: |
-            echo "▶ Stage 1: Smoke tests"
-            pytest -m smoke -v --alluredir=allure-results-smoke --clean-alluredir
+          echo "▶ Stage 1: Smoke tests"
+          pytest -m smoke -v --alluredir=allure-results
 
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
         run: |
-            echo "▶ Stage 2: Regression + E2E"
-            pytest -m "(regression or e2e) and not smoke" -v -n 4 --dist loadfile --alluredir=allure-results-regression --clean-alluredir
-
-      - name: Merge Allure results
-        if: always()
-        run: |
+          echo "▶ Stage 2: Regression + E2E"
+          
+          # Если запускается ТОЛЬКО regression или e2e (без smoke), очищаем папку от возможных артефактов
+          if [ "${{ inputs.marker }}" == "regression" ] || [ "${{ inputs.marker }}" == "e2e" ]; then
+            rm -rf allure-results
             mkdir -p allure-results
-               
-            if [ -d "allure-results-smoke" ]; then
-                cp -r allure-results-smoke/* allure-results/ || true
-            fi
-                
-            if [ -d "allure-results-regression" ]; then
-                cp -r allure-results-regression/* allure-results/ || true
-            fi
+            PYTEST_MARKER="${{ inputs.marker }}"
+          else
+            PYTEST_MARKER="(regression or e2e) and not smoke"
+          fi
+          
+          pytest -m "$PYTEST_MARKER" -v -n 4 --dist loadfile --alluredir=allure-results
 
       - name: Generate Allure report
         if: always()
         run: |
           allure generate allure-results -o allure-report --clean
 
-      - name: Copy history back for next run
+      - name: Save Allure history for next run
         if: always() && (github.event_name == 'push' || inputs.marker == 'all')
         run: |
-            mkdir -p allure-results/history
-            cp -r allure-report/history/* allure-results/history/ || true
+          mkdir -p allure-history
+          rm -rf allure-history/*
+          cp -r allure-report/history/* allure-history/ || true
+
+      - name: Cache Allure history
+        if: always() && (github.event_name == 'push' || inputs.marker == 'all')
+        uses: actions/cache/save@v4
+        with:
+          path: allure-history
+          key: allure-history-${{ github.ref_name }}-${{ inputs.marker || 'all' }}-${{ github.run_id }}
 
       - name: Upload Allure report (artifact)
         if: always()
@@ -106,7 +122,6 @@ jobs:
 
       - name: Add report link to summary
         if: always()
-
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             MARKER="${{ inputs.marker }}"
@@ -137,7 +152,3 @@ jobs:
           publish_branch: gh-pages
           publish_dir: allure-report
           keep_files: true
-
-
-
-
