@@ -16,14 +16,20 @@ on:
           - e2e
           - all
 
+# Обязательные права для работы официального деплоя Pages
 permissions:
-  contents: write
+  contents: read
   pages: write
+  id-token: write
+
+# Предотвращает одновременные деплои, чтобы они не перезаписывали друг друга
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   tests:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -48,14 +54,14 @@ jobs:
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
-      # 1. Всегда начинаем с чистой папки результатов
+      # --- ЗАПУСК ТЕСТОВ ---
+
       - name: Prepare results directory
         if: always()
         run: |
           rm -rf allure-results
           mkdir -p allure-results
 
-      # 2. Smoke тесты (только для push, marker=smoke или marker=all)
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
         run: |
@@ -64,10 +70,8 @@ jobs:
           else
             echo "▶ Running tests with marker: smoke"
           fi
-          
           pytest -m smoke -v --alluredir=allure-results
 
-      # 3. Regression + E2E
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
         run: |
@@ -77,17 +81,20 @@ jobs:
           else
             echo "▶ Running tests with marker: ${{ inputs.marker }}"
             PYTEST_MARKER="${{ inputs.marker }}"
-            # Если запускается только regression или e2e (без smoke), очищаем папку
+            # Очищаем папку, так как smoke не запускался
             rm -rf allure-results
             mkdir -p allure-results
           fi
-          
           pytest -m "$PYTEST_MARKER" -v -n 4 --dist loadfile --alluredir=allure-results
+
+      # --- ГЕНЕРАЦИЯ ОТЧЕТА ---
 
       - name: Generate Allure report
         if: always()
         run: |
           allure generate allure-results -o allure-report --clean
+          # Создаем .nojekyll, чтобы GitHub Pages не игнорировал папки, начинающиеся с "_"
+          touch allure-report/.nojekyll
 
       - name: Upload Allure report (artifact)
         if: always()
@@ -97,22 +104,27 @@ jobs:
           path: allure-report
           retention-days: 30
 
-      # 4. Ссылка в Summary всегда ведет в корень, т.к. деплой идет в корень
       - name: Add report link to summary
         if: always()
         run: |
           URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          
           echo "## 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Report:** [$URL]($URL)" >> $GITHUB_STEP_SUMMARY
 
-      # 5. Публикация в корень. keep_files: false — чтобы старые отчеты не смешивались с новыми
+      # --- ОФИЦИАЛЬНЫЙ ДЕПЛОЙ НА GITHUB PAGES ---
+
+      - name: Setup Pages
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        if: always() && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'allure-report'
+
       - name: Deploy to GitHub Pages
         if: always() && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-report
-          keep_files: false
+        id: deployment
+        uses: actions/deploy-pages@v4
