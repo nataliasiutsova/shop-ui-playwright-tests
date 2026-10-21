@@ -10,7 +10,7 @@ from utils.users import STANDARD_USER
 def test_full_purchase_flow(login_page, inventory_page, cart_page, checkout_page):
     with allure.step("Login as standard_user"):
         login_page.open()
-        login_page.login(STANDARD_USER.username, STANDARD_USER.password)
+        login_page.login(STANDARD_USER["username"], STANDARD_USER["password"])
         login_page.expect_url_contains("/inventory.html")
 
     with allure.step("Add product at index 0 to cart"):
@@ -43,7 +43,7 @@ def test_full_purchase_flow(login_page, inventory_page, cart_page, checkout_page
 def test_purchase_with_cancel(login_page, inventory_page, cart_page, checkout_page):
     with allure.step("Login and add product"):
         login_page.open()
-        login_page.login(STANDARD_USER.username, STANDARD_USER.password)
+        login_page.login(STANDARD_USER["username"], STANDARD_USER["password"])
         inventory_page.add_item_by_index(0)
 
     with allure.step("Go to checkout"):

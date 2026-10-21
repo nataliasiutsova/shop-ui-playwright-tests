@@ -16,8 +16,8 @@ def test_login_success(login_page):
     with allure.step("Open login page"):
         login_page.open()
 
-    with allure.step(f"Log in as '{STANDARD_USER.username}'"):
-        login_page.login(STANDARD_USER.username, STANDARD_USER.password)
+    with allure.step(f"Log in as '{STANDARD_USER['username']}'"):
+        login_page.login(STANDARD_USER['username'], STANDARD_USER["password"])
 
     with allure.step("Verify redirect to inventory page"):
         login_page.expect_url_contains("/inventory.html")
@@ -33,7 +33,7 @@ def test_login_invalid_password(login_page):
         login_page.open()
 
     with allure.step("Log in with wrong password"):
-        login_page.login(STANDARD_USER.username, WRONG_PASSWORD)
+        login_page.login(STANDARD_USER["username"], WRONG_PASSWORD)
 
     with allure.step("Verify 'do not match' error is shown"):
         login_page.expect_error("Username and password do not match any user in this service")
@@ -48,8 +48,8 @@ def test_login_locked_user(login_page):
     with allure.step("Open login page"):
         login_page.open()
 
-    with allure.step(f"Log in as '{LOCKED_USER.username}'"):
-        login_page.login(LOCKED_USER.username, LOCKED_USER.password)
+    with allure.step(f"Log in as '{LOCKED_USER["username"]}'"):
+        login_page.login(LOCKED_USER["username"], LOCKED_USER["password"])
 
     with allure.step("Verify 'locked out' error is shown"):
         login_page.expect_error("Sorry, this user has been locked out")
@@ -65,7 +65,7 @@ def test_login_empty_username(login_page):
         login_page.open()
 
     with allure.step("Submit with empty username"):
-        login_page.login(EMPTY, STANDARD_USER.password)
+        login_page.login(EMPTY, STANDARD_USER["password"])
 
     with allure.step("Verify 'Username is required' error"):
         login_page.expect_error("Username is required")
@@ -81,7 +81,7 @@ def test_login_empty_password(login_page):
         login_page.open()
 
     with allure.step("Submit with empty password"):
-        login_page.login(STANDARD_USER.username, EMPTY)
+        login_page.login(STANDARD_USER["username"], EMPTY)
 
     with allure.step("Verify 'Password is required' error"):
         login_page.expect_error("Password is required")

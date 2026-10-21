@@ -86,7 +86,7 @@ Layered UI test framework for the **SauceDemo** web application built with **Pyt
 4. Click **Run workflow**.
 5. Open the **Summary** tab — direct link to the Allure report.
 
-**→ [Latest report](https://YOUR_USERNAME.github.io/shop-ui-playwright-tests/)**
+**→ [Latest report](https://nataliasiutsova.github.io/shop-ui-playwright-tests/)**
 
 ### 🐍 2. Locally (requires Python + Allure CLI)
 
@@ -104,7 +104,10 @@ pip install --upgrade pip
 pip install -r requirements.txt
 playwright install chromium
 
-# 4. Run all tests (with script)
+# 4. Make the runner executable
+chmod +x run_tests.sh
+
+# 5. Run all tests (with script)
 ./run_tests.sh
 
 # Or run specific marker

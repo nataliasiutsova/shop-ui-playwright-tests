@@ -24,7 +24,7 @@ def test_cart_preserved_after_logout(inventory_page, login_page):
         login_page.expect_login_form_visible()
 
     with allure.step("Log in again as the same user"):
-        login_page.login(STANDARD_USER.username, STANDARD_USER.password)
+        login_page.login(STANDARD_USER["username"], STANDARD_USER["password"])
 
     with allure.step("Verify cart still shows 1 item (preserved)"):
         inventory_page.expect_cart_count(1)

@@ -159,7 +159,7 @@ def logged_in_page(clean_cart: Page, base_url: str) -> Page:
     """Page with a logged-in standard user and clean cart."""
     login = LoginPage(clean_cart, base_url)
     login.open()
-    login.login(STANDARD_USER.username, STANDARD_USER.password)
+    login.login(STANDARD_USER["username"], STANDARD_USER["password"])
     return clean_cart
 
 
