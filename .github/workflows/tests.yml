@@ -63,23 +63,27 @@ jobs:
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
         run: |
-          echo "▶ Stage 1: Smoke tests"
-          pytest -m smoke -v --alluredir=allure-results --clean-alluredir
-
+            echo "▶ Stage 1: Smoke tests"
+            pytest -m smoke -v --alluredir=allure-results-smoke --clean-alluredir
 
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
         run: |
-          echo "▶ Stage 2: Regression + E2E"
-          
-          if [ "${{ inputs.marker }}" == "regression" ] || [ "${{ inputs.marker }}" == "e2e" ]; then
-            CLEAN_FLAG="--clean-alluredir"
-          else
-            CLEAN_FLAG=""
-          fi
-          
-          pytest -m "(regression or e2e) and not smoke" -v -n 4 --dist loadfile --alluredir=allure-results 
-     
+            echo "▶ Stage 2: Regression + E2E"
+            pytest -m "(regression or e2e) and not smoke" -v -n 4 --dist loadfile --alluredir=allure-results-regression --clean-alluredir
+
+      - name: Merge Allure results
+        if: always()
+        run: |
+            mkdir -p allure-results
+               
+            if [ -d "allure-results-smoke" ]; then
+                cp -r allure-results-smoke/* allure-results/ || true
+            fi
+                
+            if [ -d "allure-results-regression" ]; then
+                cp -r allure-results-regression/* allure-results/ || true
+            fi
 
       - name: Generate Allure report
         if: always()
