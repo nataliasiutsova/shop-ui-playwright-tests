@@ -48,12 +48,14 @@ jobs:
           sudo mv allure-2.27.0 /opt/allure
           sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
 
+      # 1. Всегда начинаем с чистой папки результатов
       - name: Prepare results directory
         if: always()
         run: |
           rm -rf allure-results
           mkdir -p allure-results
 
+      # 2. Smoke тесты (только для push, marker=smoke или marker=all)
       - name: Run smoke tests (sequential)
         if: always() && (github.event_name == 'push' || inputs.marker == 'smoke' || inputs.marker == 'all')
         run: |
@@ -65,6 +67,7 @@ jobs:
           
           pytest -m smoke -v --alluredir=allure-results
 
+      # 3. Regression + E2E
       - name: Run regression + e2e (4 workers)
         if: always() && (github.event_name == 'push' || inputs.marker == 'regression' || inputs.marker == 'e2e' || inputs.marker == 'all')
         run: |
@@ -74,7 +77,7 @@ jobs:
           else
             echo "▶ Running tests with marker: ${{ inputs.marker }}"
             PYTEST_MARKER="${{ inputs.marker }}"
-            # Очищаем папку, так как smoke не запускался
+            # Если запускается только regression или e2e (без smoke), очищаем папку
             rm -rf allure-results
             mkdir -p allure-results
           fi
@@ -94,27 +97,17 @@ jobs:
           path: allure-report
           retention-days: 30
 
+      # 4. Ссылка в Summary всегда ведет в корень, т.к. деплой идет в корень
       - name: Add report link to summary
         if: always()
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            MARKER="${{ inputs.marker }}"
-          else
-            MARKER="all" 
-          fi
-          
-          if [ "$MARKER" = "smoke" ] || [ "$MARKER" = "all" ]; then
-            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
-          else
-            URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/$MARKER/"
-          fi
+          URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           
           echo "## 🔗 Allure Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Marker:** \`$MARKER\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Report:** [$URL]($URL)" >> $GITHUB_STEP_SUMMARY
 
+      # 5. Публикация в корень. keep_files: false — чтобы старые отчеты не смешивались с новыми
       - name: Deploy to GitHub Pages
         if: always() && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
@@ -122,4 +115,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-report
-          keep_files: true
+          keep_files: false
